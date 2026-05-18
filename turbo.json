@@ -45,8 +45,5 @@
         "^build"
       ]
     }
-  },
-  "globalEnv": [
-    "PORT"
-  ]
+  }
 }
