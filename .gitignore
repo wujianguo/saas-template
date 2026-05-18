@@ -1,32 +1,36 @@
-# dependencies
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
 node_modules
-.pnpm-store
+.pnp
+.pnp.js
 
-# build outputs
-dist
-build
-.next
-out
-
-# turbo
-.turbo
-
-# env
+# Local env files
 .env
 .env.local
-.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# prisma
-prisma/migrations
+# Testing
+coverage
 
-# logs
-*.log
+# Turbo
+.turbo
+
+# Vercel
+.vercel
+
+# Build Outputs
+.next/
+out/
+build
+dist
+
+
+# Debug
 npm-debug.log*
-pnpm-debug.log*
 
-# editor
-.vscode
-.idea
-*.swp
-*.swo
+# Misc
 .DS_Store
+*.pem
