@@ -1,16 +1,8 @@
-import type { Config } from "jest"
+import { nestConfig } from "@workspace/jest-config"
 
-const config: Config = {
-  moduleFileExtensions: ["js", "json", "ts"],
+export default {
+  ...nestConfig,
   moduleNameMapper: {
-    "^@workspace/api$": "<rootDir>/../../packages/api/src",
-  },
-  rootDir: ".",
-  testEnvironment: "node",
-  testRegex: ".*\\.spec\\.ts$",
-  transform: {
-    "^.+\\.(t|j)s$": "ts-jest",
+    "^@workspace/api$": "<rootDir>/../../../packages/api/src",
   },
 }
-
-export default config

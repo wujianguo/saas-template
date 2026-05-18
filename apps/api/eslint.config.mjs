@@ -1,20 +1,9 @@
-import { nodeConfig } from "@workspace/eslint-config/node"
-
-const jestGlobals = {
-  afterEach: "readonly",
-  beforeEach: "readonly",
-  describe: "readonly",
-  expect: "readonly",
-  it: "readonly",
-}
+import { nestJsConfig } from "@workspace/eslint-config/nest-js"
 
 /** @type {import("eslint").Linter.Config[]} */
 export default [
-  ...nodeConfig,
+  ...nestJsConfig,
   {
-    files: ["**/*.spec.ts", "test/**/*.ts"],
-    languageOptions: {
-      globals: jestGlobals,
-    },
+    ignores: ["eslint.config.mjs"],
   },
 ]
