@@ -88,9 +88,9 @@ Components land in `packages/ui/src/components/` and are importable as `@workspa
 - Settings: `semi: false`, `singleQuote: false`, `tabWidth: 2`, `trailingComma: "es5"`, `printWidth: 80`.
 - Uses `prettier-plugin-tailwindcss` wired to the shared globals.css, with `tailwindFunctions: ["cn", "cva"]`.
 
------
+## Agent rules
 
-## Rule 1. Think Before Coding
+### Rule 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
@@ -100,7 +100,7 @@ Before implementing:
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
 
-## Rule 2. Simplicity First
+### Rule 2. Simplicity First
 
 **Minimum code that solves the problem. Nothing speculative.**
 
@@ -112,7 +112,7 @@ Before implementing:
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-## Rule 3. Surgical Changes
+### Rule 3. Surgical Changes
 
 **Touch only what you must. Clean up only your own mess.**
 
@@ -128,7 +128,7 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-## Rule 4. Goal-Driven Execution
+### Rule 4. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
@@ -147,52 +147,51 @@ For multi-step tasks, state a brief plan:
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
 
-
-## Rule 5 — Use the model only for judgment calls
+### Rule 5 — Use the model only for judgment calls
 Use Claude for: classification, drafting, summarization, extraction from unstructured text.
 Do NOT use Claude for: routing, retries, status-code handling, deterministic transforms.
 If a status code already answers the question, plain code answers the question.
 
 
-## Rule 6 — Token budgets are not advisory
+### Rule 6 — Token budgets are not advisory
 Per-task budget: 4,000 tokens.
 Per-session budget: 30,000 tokens.
 If a task is approaching budget, summarize and start fresh. Do not push through.
 Surfacing the breach > silently overrunning.
 
 
-## Rule 7 — Surface conflicts, don't average them
+### Rule 7 — Surface conflicts, don't average them
 If two existing patterns in the codebase contradict, don't blend them.
 Pick one (the more recent / more tested), explain why, and flag the other for cleanup.
 "Average" code that satisfies both rules is the worst code.
 
 
-## Rule 8 — Read before you write
+### Rule 8 — Read before you write
 Before adding code in a file, read the file's exports, the immediate caller, and any obvious shared utilities.
 If you don't understand why existing code is structured the way it is, ask before adding to it.
 "Looks orthogonal to me" is the most dangerous phrase in this codebase.
 
 
-## Rule 9 — Tests verify intent, not just behavior
+### Rule 9 — Tests verify intent, not just behavior
 Every test must encode WHY the behavior matters, not just WHAT it does.
 A test like `expect(getUserName()).toBe('John')` is worthless if the function takes a hardcoded ID.
 If you can't write a test that would fail when business logic changes, the function is wrong.
 
 
-## Rule 10 — Checkpoint after every significant step
+### Rule 10 — Checkpoint after every significant step
 After completing each step in a multi-step task: summarize what was done, what's verified, what's left.
 Don't continue from a state you can't describe back to me.
 If you lose track, stop and restate.
 
 
-## Rule 11 — Match the codebase's conventions, even if you disagree
+### Rule 11 — Match the codebase's conventions, even if you disagree
 If the codebase uses snake_case and you'd prefer camelCase: snake_case.
 If the codebase uses class-based components and you'd prefer hooks: class-based.
 Disagreement is a separate conversation. Inside the codebase, conformance > taste.
 If you genuinely think the convention is harmful, surface it. Don't fork it silently.
 
 
-## Rule 12 — Fail loud
+### Rule 12 — Fail loud
 If you can't be sure something worked, say so explicitly.
 "Migration completed" is wrong if 30 records were skipped silently.
 "Tests pass" is wrong if you skipped any.
