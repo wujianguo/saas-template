@@ -1,7 +1,11 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
   "moduleNameMapper": {
-    "^@workspace/api$": "<rootDir>/../../packages/api/src"
+    "^@workspace/api$": "<rootDir>/../../../packages/api/src"
   },
   "rootDir": ".",
   "testEnvironment": "node",
