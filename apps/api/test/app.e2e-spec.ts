@@ -22,7 +22,9 @@ describe("AppController (e2e)", () => {
   })
 
   it("/ (GET)", () => {
-    return request(app.getHttpServer())
+    const httpServer = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+
+    return request(httpServer)
       .get("/")
       .expect(200)
       .expect({ message: HELLO_MESSAGE })
