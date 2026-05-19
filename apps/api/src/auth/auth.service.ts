@@ -85,7 +85,18 @@ export class AuthService {
             })
           },
         }),
-        apiKey(),
+        apiKey([
+          {
+            configId: "user",
+            defaultPrefix: "saa_",
+            references: "user",
+          },
+          {
+            configId: "organization",
+            defaultPrefix: "sao_",
+            references: "organization",
+          },
+        ]),
       ],
     })
   }
