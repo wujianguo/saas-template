@@ -4,6 +4,7 @@ import { HELLO_MESSAGE } from "@workspace/api"
 import request from "supertest"
 
 import { AppModule } from "../src/app.module"
+import { AuthService } from "../src/auth/auth.service"
 import { PrismaService } from "../src/prisma/prisma.service"
 
 describe("AppController (e2e)", () => {
@@ -15,6 +16,16 @@ describe("AppController (e2e)", () => {
     })
       .overrideProvider(PrismaService)
       .useValue({})
+      .overrideProvider(AuthService)
+      .useValue({
+        auth: {
+          api: {
+            getSession: jest.fn().mockResolvedValue(null),
+            verifyApiKey: jest.fn().mockResolvedValue({ valid: false, key: null }),
+          },
+          handler: async () => new Response("", { status: 404 }),
+        },
+      })
       .compile()
 
     app = moduleFixture.createNestApplication()
