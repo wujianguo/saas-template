@@ -4,7 +4,6 @@ import { HELLO_MESSAGE } from "@workspace/api"
 import request from "supertest"
 
 import { AppModule } from "../src/app.module"
-import { AuthService } from "../src/auth/auth.service"
 import { PrismaService } from "../src/prisma/prisma.service"
 
 // Prevent loading better-auth ESM modules in Jest
@@ -22,7 +21,6 @@ jest.mock("../src/auth/auth.service", () => ({
     }
   },
 }))
-
 describe("AppController (e2e)", () => {
   let app: INestApplication
 

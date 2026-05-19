@@ -22,6 +22,21 @@ jest.mock("../src/auth/auth.service", () => ({
         getFullOrganization: jest.fn(),
         updateOrganization: jest.fn(),
         deleteOrganization: jest.fn(),
+        addMember: jest.fn(),
+        listMembers: jest.fn(),
+        removeMember: jest.fn(),
+        updateMemberRole: jest.fn(),
+        createInvitation: jest.fn(),
+        listInvitations: jest.fn(),
+        cancelInvitation: jest.fn(),
+        acceptInvitation: jest.fn(),
+        createTeam: jest.fn(),
+        listOrganizationTeams: jest.fn(),
+        updateTeam: jest.fn(),
+        removeTeam: jest.fn(),
+        addTeamMember: jest.fn(),
+        removeTeamMember: jest.fn(),
+        listTeamMembers: jest.fn(),
       },
     }
   },
@@ -34,6 +49,10 @@ const mockOrg = {
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 }
+
+const mockMember = { id: "m1", userId: "u1", role: "member", organizationId: "org-1" }
+const mockInvitation = { id: "inv-1", email: "new@example.com", role: "member", organizationId: "org-1", status: "pending" }
+const mockTeam = { id: "t1", name: "Engineering", organizationId: "org-1" }
 
 function buildAuthServiceMock() {
   return {
@@ -51,11 +70,26 @@ function buildAuthServiceMock() {
         listOrganizations: jest.fn().mockResolvedValue([mockOrg]),
         getFullOrganization: jest
           .fn()
-          .mockResolvedValue({ ...mockOrg, members: [], teams: [] }),
+          .mockResolvedValue({ ...mockOrg, members: [mockMember], teams: [mockTeam] }),
         updateOrganization: jest
           .fn()
           .mockResolvedValue({ ...mockOrg, name: "Acme Corp Updated" }),
         deleteOrganization: jest.fn().mockResolvedValue(mockOrg),
+        addMember: jest.fn().mockResolvedValue(mockMember),
+        listMembers: jest.fn().mockResolvedValue([mockMember]),
+        removeMember: jest.fn().mockResolvedValue({ success: true }),
+        updateMemberRole: jest.fn().mockResolvedValue({ ...mockMember, role: "admin" }),
+        createInvitation: jest.fn().mockResolvedValue(mockInvitation),
+        listInvitations: jest.fn().mockResolvedValue([mockInvitation]),
+        cancelInvitation: jest.fn().mockResolvedValue({ success: true }),
+        acceptInvitation: jest.fn().mockResolvedValue({ ...mockInvitation, status: "accepted" }),
+        createTeam: jest.fn().mockResolvedValue(mockTeam),
+        listOrganizationTeams: jest.fn().mockResolvedValue([mockTeam]),
+        updateTeam: jest.fn().mockResolvedValue({ ...mockTeam, name: "Platform" }),
+        removeTeam: jest.fn().mockResolvedValue({ success: true }),
+        addTeamMember: jest.fn().mockResolvedValue({ teamId: "t1", userId: "u2" }),
+        removeTeamMember: jest.fn().mockResolvedValue({ success: true }),
+        listTeamMembers: jest.fn().mockResolvedValue([{ userId: "u1" }]),
       },
     },
   }
@@ -142,7 +176,7 @@ describe("OrganizationController (e2e)", () => {
       .set("Cookie", "session=tok")
       .expect(200)
       .expect((res) => {
-        expect(res.body).toMatchObject({ id: "org-1", members: [] })
+        expect(res.body).toMatchObject({ id: "org-1", members: expect.any(Array) })
       })
   })
 
@@ -170,5 +204,92 @@ describe("OrganizationController (e2e)", () => {
     authServiceMock.getSession.mockResolvedValueOnce(null)
     const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
     await request(server).get("/organizations").expect(401)
+  })
+
+  it("POST /organizations/:id/members — adds a member", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .post("/organizations/org-1/members")
+      .set("Cookie", "session=tok")
+      .send({ userId: "u2", role: "member" })
+      .expect(201)
+      .expect((res) => {
+        expect(res.body).toMatchObject({ id: "m1" })
+      })
+  })
+
+  it("GET /organizations/:id/members — lists members", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .get("/organizations/org-1/members")
+      .set("Cookie", "session=tok")
+      .expect(200)
+      .expect((res) => {
+        expect(Array.isArray(res.body)).toBe(true)
+        expect(res.body[0]).toMatchObject({ id: "m1" })
+      })
+  })
+
+  it("PATCH /organizations/:id/members/:memberId — updates member role", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .patch("/organizations/org-1/members/m1")
+      .set("Cookie", "session=tok")
+      .send({ role: "admin" })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body).toMatchObject({ role: "admin" })
+      })
+  })
+
+  it("DELETE /organizations/:id/members/:memberId — removes member", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .delete("/organizations/org-1/members/m1")
+      .set("Cookie", "session=tok")
+      .expect(200)
+  })
+
+  it("POST /organizations/:id/invitations — invites a user", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .post("/organizations/org-1/invitations")
+      .set("Cookie", "session=tok")
+      .send({ email: "new@example.com", role: "member" })
+      .expect(201)
+      .expect((res) => {
+        expect(res.body).toMatchObject({ id: "inv-1", email: "new@example.com" })
+      })
+  })
+
+  it("GET /organizations/:id/invitations — lists invitations", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .get("/organizations/org-1/invitations")
+      .set("Cookie", "session=tok")
+      .expect(200)
+      .expect((res) => {
+        expect(Array.isArray(res.body)).toBe(true)
+        expect(res.body[0]).toMatchObject({ id: "inv-1" })
+      })
+  })
+
+  it("DELETE /organizations/:id/invitations/:invitationId — cancels invitation", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .delete("/organizations/org-1/invitations/inv-1")
+      .set("Cookie", "session=tok")
+      .expect(200)
+  })
+
+  it("POST /invitations/:id/accept — accepts invitation", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .post("/invitations/inv-1/accept")
+      .set("Cookie", "session=tok")
+      .expect(201)
+      .expect((res) => {
+        expect(res.body).toMatchObject({ status: "accepted" })
+      })
   })
 })

@@ -70,6 +70,20 @@ export class AuthService {
         organization({
           allowUserToCreateOrganization: true,
           teams: { enabled: true },
+          sendInvitationEmail: async (data: {
+            id: string
+            email: string
+            role: string
+            organization: { name: string }
+          }) => {
+            if (!resend) return
+            await resend.emails.send({
+              from: "noreply@example.com",
+              to: data.email,
+              subject: `You've been invited to join ${data.organization.name}`,
+              html: `<p>You have been invited to join <strong>${data.organization.name}</strong> as ${data.role}.</p>`,
+            })
+          },
         }),
         apiKey(),
       ],
