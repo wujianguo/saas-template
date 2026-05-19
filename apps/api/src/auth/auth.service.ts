@@ -90,4 +90,8 @@ export class AuthService {
       error: unknown
     }>
   }
+
+  toHeaders(headers: IncomingHttpHeaders): Headers {
+    return fromNodeHeaders(headers)
+  }
 }
