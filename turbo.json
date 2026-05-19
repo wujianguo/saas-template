@@ -2,7 +2,15 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "globalEnv": [
-    "PORT"
+    "PORT",
+    "DATABASE_URL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
+    "GITLAB_CLIENT_ID",
+    "GITLAB_CLIENT_SECRET",
+    "RESEND_API_KEY"
   ],
   "tasks": {
     "build": {
