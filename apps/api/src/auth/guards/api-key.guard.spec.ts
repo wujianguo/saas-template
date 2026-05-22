@@ -37,7 +37,7 @@ describe("ApiKeyGuard", () => {
     mockVerifyApiKey.mockReset()
   })
 
-  it("throws 401 when no x-api-key header is present", async () => {
+  it("throws 401 when no authorization header is present", async () => {
     await expect(guard.canActivate(makeContext())).rejects.toThrow(
       UnauthorizedException
     )
@@ -51,7 +51,7 @@ describe("ApiKeyGuard", () => {
       error: { code: "INVALID_API_KEY", message: "Invalid key" },
     })
     await expect(
-      guard.canActivate(makeContext({ "x-api-key": "bad-key" }))
+      guard.canActivate(makeContext({ authorization: "Bearer bad-key" }))
     ).rejects.toThrow(UnauthorizedException)
   })
 
@@ -59,12 +59,19 @@ describe("ApiKeyGuard", () => {
     const key = { id: "k1", referenceId: "u1", key: "hashed" }
     mockVerifyApiKey.mockResolvedValue({ valid: true, key, error: null })
 
-    const ctx = makeContext({ "x-api-key": "valid-key" })
+    const ctx = makeContext({ authorization: "Bearer valid-key" })
     const result = await guard.canActivate(ctx)
 
     expect(result).toBe(true)
     const request = ctx.switchToHttp().getRequest<Record<string, unknown>>()
     expect(request.apiKey).toEqual(key)
     expect(request.authenticated).toBe(true)
+  })
+
+  it("throws 401 when only x-api-key header is present", async () => {
+    await expect(
+      guard.canActivate(makeContext({ "x-api-key": "legacy-key" }))
+    ).rejects.toThrow(UnauthorizedException)
+    expect(mockVerifyApiKey).not.toHaveBeenCalled()
   })
 })

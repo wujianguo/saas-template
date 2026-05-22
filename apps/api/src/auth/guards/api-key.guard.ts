@@ -15,7 +15,11 @@ export class ApiKeyGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<IncomingMessage & Record<string, unknown>>()
 
-    const key = (request.headers as Record<string, string | undefined>)["x-api-key"]
+    const headers = request.headers as IncomingMessage["headers"]
+    const authorization = headers.authorization
+    const authValue = Array.isArray(authorization) ? authorization[0] : authorization
+    const key =
+      typeof authValue === "string" ? authValue.replace(/^Bearer\s+/i, "").trim() : undefined
 
     if (!key) {
       throw new UnauthorizedException()
