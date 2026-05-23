@@ -8,6 +8,8 @@ import {
   IsString,
 } from "class-validator"
 
+import { IsFutureDateString } from "./is-future-date-string.decorator"
+
 export class CreateApiKeyDto {
   @ApiProperty({ description: "Key name" })
   @IsString()
@@ -27,6 +29,7 @@ export class CreateApiKeyDto {
 
   @ApiPropertyOptional({ description: "Expiry date (ISO 8601)" })
   @IsDateString()
+  @IsFutureDateString()
   @IsOptional()
   expiresAt?: string
 

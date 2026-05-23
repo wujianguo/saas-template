@@ -14,13 +14,13 @@ export interface UserResponse {
   email: string
   image?: string | null
   emailVerified: boolean
-  createdAt: Date
+  createdAt: string
 }
 
 export interface SessionResponse {
   id: string
   userId: string
-  expiresAt: Date
+  expiresAt: string
   ipAddress?: string | null
   userAgent?: string | null
 }
@@ -33,7 +33,7 @@ export interface OrganizationResponse {
   slug: string
   logo?: string | null
   metadata?: Record<string, unknown> | null
-  createdAt: Date
+  createdAt: string
 }
 
 export interface MemberResponse {
@@ -50,8 +50,8 @@ export interface InvitationResponse {
   organizationId: string
   role: string
   status: string
-  expiresAt?: Date | null
-  createdAt: Date
+  expiresAt?: string | null
+  createdAt: string
 }
 
 // ─── Teams ────────────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ export interface TeamResponse {
   id: string
   name: string
   organizationId: string
-  createdAt: Date
+  createdAt: string
 }
 
 // ─── Projects ─────────────────────────────────────────────────────────────────
@@ -71,8 +71,8 @@ export interface ProjectResponse {
   slug: string
   description?: string | null
   organizationId: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }
 
 // ─── API Keys ─────────────────────────────────────────────────────────────────
@@ -86,9 +86,9 @@ export interface ApiKeyResponse {
   enabled: boolean
   permissions?: Record<string, string[]> | null
   metadata?: Record<string, unknown> | null
-  expiresAt?: Date | null
-  createdAt: Date
-  lastRequest?: Date | null
+  expiresAt?: string | null
+  createdAt: string
+  lastRequest?: string | null
 }
 
 /** Returned only on creation — includes the full secret key */

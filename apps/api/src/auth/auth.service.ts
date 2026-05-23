@@ -10,10 +10,14 @@ import type { IncomingHttpHeaders } from "node:http"
 
 import { PrismaService } from "../prisma/prisma.service"
 
+type BetterAuthInstance = {
+  handler: (request: Request) => Promise<Response>
+  api: Record<string, (...args: unknown[]) => unknown>
+}
+
 @Injectable()
 export class AuthService {
-  // Better Auth instance - typed as any to preserve full plugin API inference
-  auth: any
+  auth: BetterAuthInstance
 
   constructor(
     private readonly prisma: PrismaService,
@@ -29,7 +33,7 @@ export class AuthService {
 
     this.auth = betterAuth({
       database: prismaAdapter(this.prisma, { provider: "postgresql" }),
-      secret: this.config.get<string>("BETTER_AUTH_SECRET"),
+      secret: this.config.getOrThrow<string>("BETTER_AUTH_SECRET"),
       baseURL:
         this.config.get<string>("BETTER_AUTH_URL") ?? "http://localhost:3001",
       emailVerification: {
@@ -98,7 +102,7 @@ export class AuthService {
           },
         ]),
       ],
-    })
+    }) as BetterAuthInstance
   }
 
   getSession(headers: IncomingHttpHeaders) {

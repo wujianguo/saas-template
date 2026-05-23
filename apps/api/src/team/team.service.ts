@@ -1,13 +1,27 @@
-import { Injectable } from "@nestjs/common"
+import { Injectable, NotFoundException } from "@nestjs/common"
 import type { IncomingHttpHeaders } from "node:http"
 
 import { AuthService } from "../auth/auth.service"
+import { PrismaService } from "../prisma/prisma.service"
 import type { CreateTeamDto } from "./dto/create-team.dto"
 import type { UpdateTeamDto } from "./dto/update-team.dto"
 
 @Injectable()
 export class TeamService {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly prisma: PrismaService
+  ) {}
+
+  private async ensureTeamInOrganization(teamId: string, organizationId: string) {
+    const team = await this.prisma.team.findFirst({
+      where: { id: teamId, organizationId },
+    })
+
+    if (!team) {
+      throw new NotFoundException("Team not found")
+    }
+  }
 
   create(organizationId: string, dto: CreateTeamDto, rawHeaders: IncomingHttpHeaders) {
     const headers = this.authService.toHeaders(rawHeaders)
@@ -25,7 +39,13 @@ export class TeamService {
     })
   }
 
-  update(teamId: string, dto: UpdateTeamDto, rawHeaders: IncomingHttpHeaders) {
+  async update(
+    organizationId: string,
+    teamId: string,
+    dto: UpdateTeamDto,
+    rawHeaders: IncomingHttpHeaders
+  ) {
+    await this.ensureTeamInOrganization(teamId, organizationId)
     const headers = this.authService.toHeaders(rawHeaders)
     return this.authService.auth.api.updateTeam({
       body: { teamId, ...dto },
@@ -33,12 +53,23 @@ export class TeamService {
     })
   }
 
-  remove(teamId: string, rawHeaders: IncomingHttpHeaders) {
+  async remove(
+    organizationId: string,
+    teamId: string,
+    rawHeaders: IncomingHttpHeaders
+  ) {
+    await this.ensureTeamInOrganization(teamId, organizationId)
     const headers = this.authService.toHeaders(rawHeaders)
     return this.authService.auth.api.removeTeam({ body: { teamId }, headers })
   }
 
-  addMember(teamId: string, userId: string, rawHeaders: IncomingHttpHeaders) {
+  async addMember(
+    organizationId: string,
+    teamId: string,
+    userId: string,
+    rawHeaders: IncomingHttpHeaders
+  ) {
+    await this.ensureTeamInOrganization(teamId, organizationId)
     const headers = this.authService.toHeaders(rawHeaders)
     return this.authService.auth.api.addTeamMember({
       body: { teamId, userId },
@@ -46,7 +77,13 @@ export class TeamService {
     })
   }
 
-  removeMember(teamId: string, userId: string, rawHeaders: IncomingHttpHeaders) {
+  async removeMember(
+    organizationId: string,
+    teamId: string,
+    userId: string,
+    rawHeaders: IncomingHttpHeaders
+  ) {
+    await this.ensureTeamInOrganization(teamId, organizationId)
     const headers = this.authService.toHeaders(rawHeaders)
     return this.authService.auth.api.removeTeamMember({
       body: { teamId, userId },
@@ -54,7 +91,12 @@ export class TeamService {
     })
   }
 
-  listMembers(teamId: string, rawHeaders: IncomingHttpHeaders) {
+  async listMembers(
+    organizationId: string,
+    teamId: string,
+    rawHeaders: IncomingHttpHeaders
+  ) {
+    await this.ensureTeamInOrganization(teamId, organizationId)
     const headers = this.authService.toHeaders(rawHeaders)
     return this.authService.auth.api.listTeamMembers({
       query: { teamId },

@@ -54,6 +54,17 @@ const mockMember = { id: "m1", userId: "u1", role: "member", organizationId: "or
 const mockInvitation = { id: "inv-1", email: "new@example.com", role: "member", organizationId: "org-1", status: "pending" }
 const mockTeam = { id: "t1", name: "Engineering", organizationId: "org-1" }
 
+function buildPrismaMock() {
+  return {
+    invitation: {
+      findFirst: jest.fn().mockResolvedValue(mockInvitation),
+    },
+    team: {
+      findFirst: jest.fn().mockResolvedValue(mockTeam),
+    },
+  }
+}
+
 function buildAuthServiceMock() {
   return {
     getSession: jest.fn().mockResolvedValue({
@@ -98,15 +109,17 @@ function buildAuthServiceMock() {
 describe("OrganizationController (e2e)", () => {
   let app: INestApplication
   let authServiceMock: ReturnType<typeof buildAuthServiceMock>
+  let prismaMock: ReturnType<typeof buildPrismaMock>
 
   beforeEach(async () => {
     authServiceMock = buildAuthServiceMock()
+    prismaMock = buildPrismaMock()
 
     const moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
     })
       .overrideProvider(PrismaService)
-      .useValue({})
+      .useValue(prismaMock)
       .overrideProvider(AuthService)
       .useValue(authServiceMock)
       .compile()
@@ -218,6 +231,24 @@ describe("OrganizationController (e2e)", () => {
       })
   })
 
+  it("POST /organizations/:id/members — rejects email-only payloads with 400", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .post("/organizations/org-1/members")
+      .set("Cookie", "session=tok")
+      .send({ email: "new@example.com", role: "member" })
+      .expect(400)
+  })
+
+  it("POST /organizations/:id/members — rejects invalid roles with 400", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .post("/organizations/org-1/members")
+      .set("Cookie", "session=tok")
+      .send({ userId: "u2", role: "billing-admin" })
+      .expect(400)
+  })
+
   it("GET /organizations/:id/members — lists members", async () => {
     const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
     await request(server)
@@ -242,6 +273,15 @@ describe("OrganizationController (e2e)", () => {
       })
   })
 
+  it("PATCH /organizations/:id/members/:memberId — rejects invalid roles with 400", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .patch("/organizations/org-1/members/m1")
+      .set("Cookie", "session=tok")
+      .send({ role: "billing-admin" })
+      .expect(400)
+  })
+
   it("DELETE /organizations/:id/members/:memberId — removes member", async () => {
     const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
     await request(server)
@@ -262,6 +302,15 @@ describe("OrganizationController (e2e)", () => {
       })
   })
 
+  it("POST /organizations/:id/invitations — rejects invalid roles with 400", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .post("/organizations/org-1/invitations")
+      .set("Cookie", "session=tok")
+      .send({ email: "new@example.com", role: "billing-admin" })
+      .expect(400)
+  })
+
   it("GET /organizations/:id/invitations — lists invitations", async () => {
     const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
     await request(server)
@@ -280,6 +329,25 @@ describe("OrganizationController (e2e)", () => {
       .delete("/organizations/org-1/invitations/inv-1")
       .set("Cookie", "session=tok")
       .expect(200)
+  })
+
+  it("DELETE /organizations/:id/invitations/:invitationId — returns 404 when invitation is outside the organization", async () => {
+    prismaMock.invitation.findFirst.mockResolvedValueOnce(null)
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .delete("/organizations/org-2/invitations/inv-1")
+      .set("Cookie", "session=tok")
+      .expect(404)
+  })
+
+  it("PATCH /organizations/:organizationId/teams/:teamId — returns 404 when the team is outside the organization", async () => {
+    prismaMock.team.findFirst.mockResolvedValueOnce(null)
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .patch("/organizations/org-2/teams/t1")
+      .set("Cookie", "session=tok")
+      .send({ name: "Platform" })
+      .expect(404)
   })
 
   it("POST /invitations/:id/accept — accepts invitation", async () => {
