@@ -12,5 +12,8 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!\\.pnpm|@better-auth|better-auth|better-call|resend)"
+  ]
 }

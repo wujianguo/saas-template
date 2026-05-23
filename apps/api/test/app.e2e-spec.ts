@@ -4,14 +4,33 @@ import { HELLO_MESSAGE } from "@workspace/api"
 import request from "supertest"
 
 import { AppModule } from "../src/app.module"
+import { PrismaService } from "../src/prisma/prisma.service"
 
+// Prevent loading better-auth ESM modules in Jest
+jest.mock("../src/auth/auth.service", () => ({
+  AuthService: class AuthService {
+    getSession = jest.fn().mockResolvedValue(null)
+    verifyApiKey = jest.fn().mockResolvedValue({ valid: false, key: null })
+    toHeaders = jest.fn().mockReturnValue(new Headers())
+    auth = {
+      handler: async () => new Response("", { status: 404 }),
+      api: {
+        getSession: jest.fn().mockResolvedValue(null),
+        verifyApiKey: jest.fn().mockResolvedValue({ valid: false, key: null }),
+      },
+    }
+  },
+}))
 describe("AppController (e2e)", () => {
   let app: INestApplication
 
   beforeEach(async () => {
     const moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile()
+    })
+      .overrideProvider(PrismaService)
+      .useValue({})
+      .compile()
 
     app = moduleFixture.createNestApplication()
     await app.init()
