@@ -19,6 +19,12 @@
       "skillPath": "skills/brainstorming/SKILL.md",
       "computedHash": "8df9b47092524833138b58682d03f2e153a242e550d1693657afdbee0cc9cdb0"
     },
+    "code-review-expert": {
+      "source": "sanyuan0704/sanyuan-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-review-expert/SKILL.md",
+      "computedHash": "6c2fe31851a34e63e033257527eab04eea835ca1cf4c4276d1392a323e36e377"
+    },
     "create-auth-skill": {
       "source": "better-auth/skills",
       "sourceType": "github",
