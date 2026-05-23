@@ -10,9 +10,14 @@ import type { IncomingHttpHeaders } from "node:http"
 
 import { PrismaService } from "../prisma/prisma.service"
 
+type BetterAuthInstance = {
+  handler: (request: Request) => Promise<Response>
+  api: Record<string, (...args: unknown[]) => unknown>
+}
+
 @Injectable()
 export class AuthService {
-  auth: any
+  auth: BetterAuthInstance
 
   constructor(
     private readonly prisma: PrismaService,
@@ -97,7 +102,7 @@ export class AuthService {
           },
         ]),
       ],
-    })
+    }) as BetterAuthInstance
   }
 
   getSession(headers: IncomingHttpHeaders) {
