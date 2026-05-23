@@ -71,7 +71,6 @@ export class ProjectService {
     projectId: string,
     dto: UpdateProjectDto
   ) {
-    await this.get(organizationId, projectId)
     try {
       const result = await this.prisma.project.updateMany({
         where: { id: projectId, organizationId },
@@ -98,14 +97,9 @@ export class ProjectService {
 
   async delete(organizationId: string, projectId: string) {
     const project = await this.get(organizationId, projectId)
-    const result = await this.prisma.project.deleteMany({
+    await this.prisma.project.deleteMany({
       where: { id: projectId, organizationId },
     })
-
-    if (result.count === 0) {
-      throw new NotFoundException("Project not found")
-    }
-
     return project
   }
 }
