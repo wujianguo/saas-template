@@ -15,8 +15,9 @@ async function bootstrap() {
 
   // Mount Better Auth handler BEFORE body parser so OAuth callbacks get the raw body
   const authService = app.get(AuthService)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const authHandler = toNodeHandler(authService.auth)
+  const authHandler = toNodeHandler(
+    authService.auth as Parameters<typeof toNodeHandler>[0]
+  )
   const expressApp = app.getHttpAdapter().getInstance() as import("express").Express
   expressApp.use(
     (req: IncomingMessage, res: ServerResponse, next: () => void) => {

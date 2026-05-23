@@ -12,7 +12,7 @@ import { PrismaService } from "../prisma/prisma.service"
 
 @Injectable()
 export class AuthService {
-  auth: ReturnType<typeof betterAuth>
+  auth: any
 
   constructor(
     private readonly prisma: PrismaService,
