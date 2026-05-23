@@ -28,7 +28,8 @@ async function bootstrap() {
     }
   )
 
-  // Re-enable body parsing for NestJS routes
+  // Re-enable body parsing for NestJS routes AFTER the auth handler, so
+  // Better Auth always receives the raw (unparsed) request body.
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
 
