@@ -36,15 +36,19 @@ const mockProject = {
 
 function buildPrismaMock() {
   return {
+    member: {
+      findFirst: jest.fn().mockResolvedValue({
+        id: "member-1",
+        organizationId: "org-1",
+        userId: "u1",
+      }),
+    },
     project: {
       create: jest.fn().mockResolvedValue(mockProject),
       findMany: jest.fn().mockResolvedValue([mockProject]),
       findFirst: jest.fn().mockResolvedValue(mockProject),
-      findUnique: jest.fn().mockResolvedValue(mockProject),
-      update: jest
-        .fn()
-        .mockResolvedValue({ ...mockProject, name: "Alpha Updated" }),
-      delete: jest.fn().mockResolvedValue(mockProject),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
   }
 }
@@ -120,6 +124,15 @@ describe("ProjectController (e2e)", () => {
       })
   })
 
+  it("GET /organizations/:orgId/projects — returns 403 when user is not a member", async () => {
+    prismaMock.member.findFirst.mockResolvedValueOnce(null)
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .get("/organizations/org-1/projects")
+      .set("Cookie", "session=tok")
+      .expect(403)
+  })
+
   it("GET /organizations/:orgId/projects/:projectId — returns project", async () => {
     const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
     await request(server)
@@ -141,6 +154,9 @@ describe("ProjectController (e2e)", () => {
   })
 
   it("PATCH /organizations/:orgId/projects/:projectId — updates project", async () => {
+    prismaMock.project.findFirst
+      .mockResolvedValueOnce(mockProject)
+      .mockResolvedValueOnce({ ...mockProject, name: "Alpha Updated" })
     const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
     await request(server)
       .patch("/organizations/org-1/projects/proj-1")
@@ -150,6 +166,11 @@ describe("ProjectController (e2e)", () => {
       .expect((res) => {
         expect(res.body).toMatchObject({ name: "Alpha Updated" })
       })
+
+    expect(prismaMock.project.updateMany).toHaveBeenCalledWith({
+      where: { id: "proj-1", organizationId: "org-1" },
+      data: { name: "Alpha Updated" },
+    })
   })
 
   it("DELETE /organizations/:orgId/projects/:projectId — deletes project", async () => {
@@ -158,5 +179,9 @@ describe("ProjectController (e2e)", () => {
       .delete("/organizations/org-1/projects/proj-1")
       .set("Cookie", "session=tok")
       .expect(200)
+
+    expect(prismaMock.project.deleteMany).toHaveBeenCalledWith({
+      where: { id: "proj-1", organizationId: "org-1" },
+    })
   })
 })

@@ -1,19 +1,20 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { IsNotEmpty, IsOptional, IsString } from "class-validator"
+import { ApiProperty } from "@nestjs/swagger"
+import { IsIn, IsNotEmpty, IsString } from "class-validator"
+
+import { ORGANIZATION_ROLES, type OrganizationRole } from "../organization-roles"
 
 export class AddMemberDto {
-  @ApiPropertyOptional({ description: "User ID to add as member" })
-  @IsString()
-  @IsOptional()
-  userId?: string
-
-  @ApiPropertyOptional({ description: "Email of user to add as member" })
-  @IsString()
-  @IsOptional()
-  email?: string
-
-  @ApiProperty({ description: "Role to assign to the member", example: "member" })
+  @ApiProperty({ description: "User ID to add as member" })
   @IsString()
   @IsNotEmpty()
-  role: string
+  userId: string
+
+  @ApiProperty({
+    description: "Role to assign to the member",
+    enum: ORGANIZATION_ROLES,
+    example: "member",
+  })
+  @IsIn(ORGANIZATION_ROLES)
+  @IsNotEmpty()
+  role: OrganizationRole
 }

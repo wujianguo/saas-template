@@ -14,7 +14,6 @@ import {
   ApiCookieAuth,
   ApiOperation,
   ApiQuery,
-  ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger"
 import type { IncomingMessage } from "node:http"
@@ -27,7 +26,6 @@ import { ApiKeyService } from "./api-key.service"
 
 @ApiTags("API Keys")
 @ApiCookieAuth("session")
-@ApiSecurity("api-key")
 @UseGuards(SessionGuard)
 @Controller("api-keys")
 export class ApiKeyController {

@@ -73,10 +73,16 @@ export class ProjectService {
   ) {
     await this.get(organizationId, projectId)
     try {
-      return await this.prisma.project.update({
-        where: { id: projectId },
+      const result = await this.prisma.project.updateMany({
+        where: { id: projectId, organizationId },
         data: dto,
       })
+
+      if (result.count === 0) {
+        throw new NotFoundException("Project not found")
+      }
+
+      return this.get(organizationId, projectId)
     } catch (err) {
       if (
         err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -91,7 +97,15 @@ export class ProjectService {
   }
 
   async delete(organizationId: string, projectId: string) {
-    await this.get(organizationId, projectId)
-    return this.prisma.project.delete({ where: { id: projectId } })
+    const project = await this.get(organizationId, projectId)
+    const result = await this.prisma.project.deleteMany({
+      where: { id: projectId, organizationId },
+    })
+
+    if (result.count === 0) {
+      throw new NotFoundException("Project not found")
+    }
+
+    return project
   }
 }

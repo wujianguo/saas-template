@@ -12,7 +12,6 @@ import {
 import {
   ApiCookieAuth,
   ApiOperation,
-  ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger"
 import type { IncomingMessage } from "node:http"
@@ -27,7 +26,6 @@ import { OrganizationService } from "./organization.service"
 
 @ApiTags("Organizations")
 @ApiCookieAuth("session")
-@ApiSecurity("api-key")
 @UseGuards(SessionGuard)
 @Controller("organizations")
 export class OrganizationController {
@@ -133,7 +131,6 @@ export class OrganizationController {
     @Param("invitationId") invitationId: string,
     @Req() req: IncomingMessage
   ) {
-    void id
-    return this.orgService.cancelInvitation(invitationId, req.headers)
+    return this.orgService.cancelInvitation(id, invitationId, req.headers)
   }
 }

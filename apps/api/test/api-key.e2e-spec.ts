@@ -84,6 +84,19 @@ describe("ApiKeyController (e2e)", () => {
       .expect(400)
   })
 
+  it("POST /api-keys — rejects past expiresAt values with 400", async () => {
+    const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
+    await request(server)
+      .post("/api-keys")
+      .set("Cookie", "session=tok")
+      .send({
+        name: "My Key",
+        configId: "user",
+        expiresAt: "2000-01-01T00:00:00.000Z",
+      })
+      .expect(400)
+  })
+
   it("GET /api-keys — lists keys (no secret)", async () => {
     const server = app.getHttpServer() as unknown as Parameters<typeof request>[0]
     await request(server)

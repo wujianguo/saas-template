@@ -1,7 +1,8 @@
-import { Injectable } from "@nestjs/common"
+import { Injectable, NotFoundException } from "@nestjs/common"
 import type { IncomingHttpHeaders } from "node:http"
 
 import { AuthService } from "../auth/auth.service"
+import { PrismaService } from "../prisma/prisma.service"
 import type { AddMemberDto } from "./dto/add-member.dto"
 import type { CreateInvitationDto } from "./dto/create-invitation.dto"
 import type { CreateOrganizationDto } from "./dto/create-organization.dto"
@@ -10,7 +11,10 @@ import type { UpdateOrganizationDto } from "./dto/update-organization.dto"
 
 @Injectable()
 export class OrganizationService {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly prisma: PrismaService
+  ) {}
 
   // ─── Organization CRUD ────────────────────────────────────────────────────
 
@@ -121,7 +125,19 @@ export class OrganizationService {
     })
   }
 
-  cancelInvitation(invitationId: string, rawHeaders: IncomingHttpHeaders) {
+  async cancelInvitation(
+    organizationId: string,
+    invitationId: string,
+    rawHeaders: IncomingHttpHeaders
+  ) {
+    const invitation = await this.prisma.invitation.findFirst({
+      where: { id: invitationId, organizationId },
+    })
+
+    if (!invitation) {
+      throw new NotFoundException("Invitation not found")
+    }
+
     const headers = this.authService.toHeaders(rawHeaders)
     return this.authService.auth.api.cancelInvitation({
       body: { invitationId },

@@ -14,19 +14,18 @@ import {
   ApiCookieAuth,
   ApiOperation,
   ApiQuery,
-  ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger"
 
 import { SessionGuard } from "../auth/guards/session.guard"
+import { OrganizationMemberGuard } from "./organization-member.guard"
 import { CreateProjectDto } from "./dto/create-project.dto"
 import { UpdateProjectDto } from "./dto/update-project.dto"
 import { ProjectService } from "./project.service"
 
 @ApiTags("Projects")
 @ApiCookieAuth("session")
-@ApiSecurity("api-key")
-@UseGuards(SessionGuard)
+@UseGuards(SessionGuard, OrganizationMemberGuard)
 @Controller("organizations/:organizationId/projects")
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
